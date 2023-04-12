@@ -170,6 +170,19 @@ export class memes extends plugin {
         // 艾特的用户的头像
         let ats = e.message.filter(m => m.type === 'at')
         imgUrls = ats.map(at => at.qq).map(qq => `https://q1.qlogo.cn/g?b=qq&s=0&nk=${qq}`)
+
+        if (targetCode === 'do' && masterProtectDo && imgUrls.length==info.params.min_images) {
+          let masters = await getMasterQQ()
+          if (imgUrls[1].startsWith('https://q1.qlogo.cn')) {
+            let split = imgUrls[0].split('=')
+            let targetQQ = split[split.length - 1]
+            if (masters.map(q => String(q) ).indexOf(targetQQ) > -1) {
+              // 如果do 第二张图片为主人，则替换为发送人
+              imgUrls[1] = `https://q1.qlogo.cn/g?b=qq&s=0&nk=${e.sender.user_id}`
+            }
+          }
+        }
+
       }
       if (!imgUrls || imgUrls.length === 0) {
         // 如果都没有，用发送者的头像
