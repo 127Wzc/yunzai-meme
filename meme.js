@@ -286,9 +286,11 @@ export class memes extends plugin {
     const resultArrayBuffer = await resultBlob.arrayBuffer()
     const resultBuffer = Buffer.from(resultArrayBuffer)
     await fs.writeFileSync(resultFileLoc, resultBuffer)
-    await e.reply(segment.image(fs.createReadStream(resultFileLoc)), reply)
+    if (fs.existsSync(resultFileLoc)) {
+      await e.reply(segment.image(fs.createReadStream(resultFileLoc)), reply)
+      await fs.unlinkSync(resultFileLoc)
+    }
     fileLoc && await fs.unlinkSync(fileLoc)
-    await fs.unlinkSync(resultFileLoc)
   }
 }
 
