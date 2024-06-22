@@ -7,7 +7,9 @@ import _ from 'lodash'
 if (!global.segment) {
   global.segment = (await import('oicq')).segment
 }
-const baseUrl = 'https://memes.ikechan8370.com'
+const baseUrl = 'http://meme-generator:2233'
+//const baseUrl = 'http://39.101.174.106:9001'
+//const baseUrl = 'https://memes.ikechan8370.com'
 /**
  * 机器人发表情是否引用回复用户
  * @type {boolean}
@@ -41,7 +43,7 @@ export class memes extends plugin {
       /** https://oicqjs.github.io/oicq/#events */
       event: 'message',
       /** 优先级，数字越小等级越高 */
-      priority: 5000,
+      priority: -1110,
       rule: [
         {
           /** 命令正则匹配 */
@@ -299,22 +301,21 @@ export class memes extends plugin {
       if (imgUrls.length < info.params.min_images && imgUrls.indexOf(await getAvatar(e)) === -1) {
         // 如果数量不够，补上发送者头像，且放到最前面
         let me = [await getAvatar(e)]
-        let done = false
-        if (targetCode === 'do' && masterProtectDo) {
-          let masters = await getMasterQQ()
-          if (imgUrls[0].startsWith('https://q1.qlogo.cn')) {
-            let split = imgUrls[0].split('=')
-            let targetQQ = split[split.length - 1]
-            if (masters.map(q => q + '').indexOf(targetQQ) > -1) {
-              imgUrls = imgUrls.concat(me)
-              done = true
-            }
-          }
-        }
-        if (!done) {
-          imgUrls = me.concat(imgUrls)
-        }
+
+        imgUrls = me.concat(imgUrls)
         // imgUrls.push(`https://q1.qlogo.cn/g?b=qq&s=160&nk=${e.msg.sender.user_id}`)
+      }
+      logger.debug('imgUrls:',imgUrls)
+      if (targetCode === 'do' && masterProtectDo) {
+        let me = [await getAvatar(e)]
+        let masters = await getMasterQQ()
+        if (imgUrls[1].startsWith('https://q1.qlogo.cn')) {
+          let split = imgUrls[1].split('=')
+          let targetQQ = split[split.length - 1]
+          if (masters.map(q => q + '').indexOf(targetQQ) > -1) {
+            imgUrls = [imgUrls[1]].concat(me)
+         }
+        } 
       }
       imgUrls = imgUrls.slice(0, Math.min(info.params.max_images, imgUrls.length))
       for (let i = 0; i < imgUrls.length; i++) {
@@ -403,6 +404,7 @@ export class memes extends plugin {
     await e.reply(segment.image(`file://${resultFileLoc}`), reply)
     fileLoc && await fs.unlinkSync(fileLoc)
     await fs.unlinkSync(resultFileLoc)
+    return true   
   }
 }
 
